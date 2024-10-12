@@ -21,7 +21,7 @@ class metafed(torch.nn.Module):
         args.sort = ''
         for i in range(args.n_clients):
             args.sort += '%d-' % i
-        args.sort = args.sort[:-1]
+        args.sort = args.sort[:-1] # ??这里错了吧，最后一个字符被截断了
         self.args = args
         self.csort = [int(item) for item in args.sort.split('-')]
 

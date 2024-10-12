@@ -41,4 +41,17 @@ def communication(args, server_model, models, client_weights):
                     for client_idx in range(len(client_weights)):
                         models[client_idx].state_dict()[key].data.copy_(server_model.state_dict()[key])
     return server_model, models
+
+
+def communication_prompt(args, server_prompt, models_prompt, client_weights):
+    with torch.no_grad():
+        for key in server_prompt.state_dict().keys():
+            temp = torch.zeros_like(server_prompt.state_dict()[key])
+            for client_idx in range(len(client_weights)):
+                temp += client_weights[client_idx] * models_prompt[client_idx].state_dict()[key]
+            server_prompt.state_dict()[key].data.copy_(temp)
+            for client_idx in range(len(client_weights)):
+                models_prompt[client_idx].state_dict()[key].data.copy_(server_prompt.state_dict()[key])
+    return server_prompt, models_prompt
+
     

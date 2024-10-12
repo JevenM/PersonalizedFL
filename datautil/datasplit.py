@@ -54,7 +54,7 @@ class DataPartitioner(object):
         self.partition_sizes = partition_sizes
         self.partition_type = partition_type
         self.consistent_indices = consistent_indices
-        self.partitions = []
+        self.partitions = [] # train val test
 
         # get data, data_size, indices of the data.
         self.data_size = len(data)
@@ -75,8 +75,8 @@ class DataPartitioner(object):
         if self.partition_type == 'evenly':
             classes = np.unique(self.data.targets)
             lp = len(self.partition_sizes)
-            ti = indices[:, 0]
-            ttar = indices[:, 1]
+            ti = indices[:, 0] # idx
+            ttar = indices[:, 1] # target
             for i in range(lp):
                 self.partitions.append(np.array([]))
             for c in classes:
@@ -102,9 +102,10 @@ class DataPartitioner(object):
                 self.partitions.append(indices[from_index:to_index])
                 from_index = to_index
 
-        record_class_distribution(
+        rcd = record_class_distribution(
             self.partitions, self.data.targets
         )
+        print(rcd)
 
     def _create_indices(self, indices):
         if self.partition_type == "origin":

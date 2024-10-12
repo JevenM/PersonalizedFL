@@ -47,6 +47,34 @@ def test(model, data_loader, loss_fun, device):
 
         return loss_all / len(data_loader), correct/total
 
+def train_prompt(args, model, server_model, data_loader, optimizer, loss_fun, device):
+    model.train()
+    loss_all = 0
+    total = 0
+    correct = 0
+    for step, (data, target) in enumerate(data_loader):
+        data = data.to(device).float()
+        target = target.to(device).long()
+        output = model(data)
+        loss = loss_fun(output, target)
+        if step > 0:
+            w_diff = torch.tensor(0., device=device)
+            for w, w_t in zip(server_model.parameters(), model.parameters()):
+                w_diff += torch.pow(torch.norm(w - w_t), 2)
+
+            w_diff = torch.sqrt(w_diff)
+            loss += args.mu / 2. * w_diff
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        loss_all += loss.item()
+        total += target.size(0)
+        pred = output.data.max(1)[1]
+        correct += pred.eq(target.view(-1)).sum().item()
+
+    return loss_all / len(data_loader), correct/total
 
 def train_prox(args, model, server_model, data_loader, optimizer, loss_fun, device):
     model.train()

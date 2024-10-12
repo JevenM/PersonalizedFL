@@ -21,11 +21,11 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', type=str, default='pacs',
                         help='[vlcs | pacs | officehome | pamap | covid | medmnist]')
     parser.add_argument('--root_dir', type=str,
-                        default='./data/', help='data path')
+                        default='/data/mwj/data/', help='data path')
     parser.add_argument('--save_path', type=str,
                         default='./cks/', help='path to save the checkpoint')
     parser.add_argument('--device', type=str,
-                        default='cuda', help='[cuda | cpu]')
+                        default='cuda:1', help='[cuda | cpu]')
     parser.add_argument('--batch', type=int, default=32, help='batch size')
     parser.add_argument('--iters', type=int, default=300,
                         help='iterations for communication')
