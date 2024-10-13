@@ -2,7 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as func
 from collections import OrderedDict
-
+import math
+import torch.nn.functional as F
 
 class AlexNet(nn.Module):
     def __init__(self, num_classes=10):
@@ -174,8 +175,9 @@ class PamapModel(nn.Module):
 
 
 class lenet5v(nn.Module):
-    def __init__(self):
+    def __init__(self, algs_name):
         super(lenet5v, self).__init__()
+        self.algs_name = algs_name
         self.conv1 = nn.Conv2d(1, 6, 5)
         self.bn1 = nn.BatchNorm2d(6)
         self.relu1 = nn.ReLU()
@@ -190,7 +192,14 @@ class lenet5v(nn.Module):
         self.relu4 = nn.ReLU()
         self.fc3 = nn.Linear(84, 11)
 
-    def forward(self, x):
+        self.prompt = nn.Parameter(torch.randn(8, 256))
+        self.prompt_W_k = nn.Parameter(torch.randn(256, 256))
+        self.prompt_W_v = nn.Parameter(torch.randn(256, 256))
+        self.relu5 = nn.ReLU()
+        self.scale = math.sqrt(256)  # 缩放因子
+        self.fc4 = nn.Linear(2304, 256)
+
+    def forward(self, x, flag=0, server_prompt=None):
         y = self.conv1(x)
         y = self.bn1(y)
         y = self.relu1(y)
@@ -200,6 +209,28 @@ class lenet5v(nn.Module):
         y = self.relu2(y)
         y = self.pool2(y)
         y = y.view(y.shape[0], -1)
+        # y = self.fc1(y)
+        # y = self.relu3(y)
+        # y = self.fc2(y)
+        # y = self.relu4(y)
+        # y = self.fc3(y)
+
+        if self.algs_name =='fedlp' and flag:
+            W_K = torch.matmul(server_prompt, self.prompt_W_k)
+            W_V = torch.matmul(server_prompt, self.prompt_W_v)
+
+            scores = torch.matmul(self.prompt, W_K.t()) / self.scale
+
+            attn = F.softmax(scores, dim=-1)
+            output = torch.matmul(attn, W_V)
+            output = output + self.prompt
+            output = output.reshape(-1)
+            
+            # 增加一个批次维度，并复制 batch_size 份
+            output_repeated = output.unsqueeze(0).repeat(x.size(0), 1)  # 形状: [batch_size, 2048]  
+            y = torch.cat((y, output_repeated), dim=1)  # 在最后一个维度上拼接
+            y = self.fc4(y)
+            y = self.relu5(y)
         y = self.fc1(y)
         y = self.relu3(y)
         y = self.fc2(y)

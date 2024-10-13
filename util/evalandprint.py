@@ -36,6 +36,7 @@ def evalandprint(args, algclass, train_loaders, val_loaders, test_loaders, SAVE_
                 f' Test site-{client_idx:02d} | Epoch:{best_epoch} | Test Acc: {test_acc:.4f}')
             best_tacc[client_idx] = test_acc
         print(f' Saving the local and server checkpoint to {SAVE_PATH}')
+        print(f'best_vacc: {np.mean(np.array(best_vacc))} best_tacc: {np.mean(np.array(best_tacc))}')
         tosave = {'best_epoch': best_epoch, 'best_vacc': best_vacc, 'best_tacc': best_tacc}
         for i,tmodel in enumerate(algclass.client_model):
             tosave['client_model_'+str(i)]=tmodel.state_dict()

@@ -64,7 +64,7 @@ if __name__ == '__main__':
         args = img_param_init(args)
         args.n_clients = 4
 
-    exp_folder = f'fed_{args.dataset}_{args.alg}_{args.datapercent}_{args.non_iid_alpha}_{args.mu}_{args.model_momentum}_{args.plan}_{args.lam}_{args.threshold}_{args.iters}_{args.wk_iters}'
+    exp_folder = f'fed_{args.dataset}_{args.alg}_{args.datapercent}_{args.non_iid_alpha}_{args.mu}_{args.model_momentum}_{args.plan}_{args.lam}_{args.threshold}_{args.iters}_{args.wk_iters}_{args.lr}'
     if args.nosharebn:
         exp_folder += '_nosharebn'
     args.save_path = os.path.join(args.save_path, exp_folder)
@@ -76,7 +76,8 @@ if __name__ == '__main__':
 
     algclass = algs.get_algorithm_class(args.alg)(args)
 
-    if args.alg == 'fedap':
+    if args.alg == 'fedap' or args.alg == 'fedlp':
+        print("pretraining...")
         algclass.set_client_weight(train_loaders)
     elif args.alg == 'metafed':
         algclass.init_model_flag(train_loaders, val_loaders)
