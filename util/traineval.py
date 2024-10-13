@@ -145,11 +145,11 @@ def pretrain_model(args, model, filename, device='cuda'):
     traindata = torch.utils.data.DataLoader(
         predata, batch_size=args.batch, shuffle=True)
     loss_fun = nn.CrossEntropyLoss()
-    opt = optim.SGD(params=model.parameters(), lr=args.lr)
+    opt = optim.SGD(params=model.parameters(), lr=0.01)
     for _ in range(args.pretrained_iters):
         _, acc = train(model, traindata, opt, loss_fun, device)
     torch.save({
         'state': model.state_dict(),
         'acc': acc
     }, filename)
-    print(f'===pretrain done!=== acc: {acc}')
+    print(f'===pretrain done!=== train acc: {acc}')

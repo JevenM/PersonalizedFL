@@ -38,6 +38,9 @@ if __name__ == '__main__':
                         default='non_iid_dirichlet', help='partition data way')
     parser.add_argument('--plan', type=int,
                         default=1, help='choose the feature type')
+    parser.add_argument('--prompt_dim', type=int,
+                        default=8, help='')
+    
     parser.add_argument('--pretrained_iters', type=int,
                         default=150, help='iterations for pretrained models')
     parser.add_argument('--seed', type=int, default=0, help='random seed')
@@ -64,7 +67,7 @@ if __name__ == '__main__':
         args = img_param_init(args)
         args.n_clients = 4
 
-    exp_folder = f'fed_{args.dataset}_{args.alg}_{args.datapercent}_{args.non_iid_alpha}_{args.mu}_{args.model_momentum}_{args.plan}_{args.lam}_{args.threshold}_{args.iters}_{args.wk_iters}_{args.lr}'
+    exp_folder = f'fed_{args.dataset}_{args.alg}_{args.datapercent}_{args.non_iid_alpha}_{args.mu}_{args.model_momentum}_{args.plan}_{args.lam}_{args.threshold}_{args.iters}_{args.wk_iters}_{args.lr}_{args.prompt_dim}'
     if args.nosharebn:
         exp_folder += '_nosharebn'
     args.save_path = os.path.join(args.save_path, exp_folder)

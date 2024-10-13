@@ -127,3 +127,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+checkpoint/pretrained/medmnist_32
+checkpoint/pretrained/medmnist_32_150

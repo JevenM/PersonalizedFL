@@ -19,7 +19,7 @@ class fedlp(fedavg):
     def set_client_weight(self, train_loaders):
         os.makedirs('./checkpoint/'+'pretrained/', exist_ok=True)
         preckpt = './checkpoint/'+'pretrained/' + \
-            self.args.dataset+'_'+str(self.args.batch)
+            self.args.dataset+'_'+str(self.args.batch)+'_'+str(self.args.pretrained_iters)+'_'+str(self.args.prom)
         self.pretrain_model = copy.deepcopy(
             self.server_model).to(self.args.device)
         if not os.path.exists(preckpt):
@@ -32,10 +32,10 @@ class fedlp(fedavg):
 
     def client_train(self, c_idx, dataloader, round):
         for name, param in self.client_model[c_idx].named_parameters():
-            if "conv1" in name or "bn1" in name or "relu1" in name or "pool1" in name or "conv2" in name or "bn2" in name or "relu2" in name or "pool2" in name:
+            if "conv1" in name or "bn1" in name or "conv2" in name or "bn2" in name:
                 param.requires_grad = False
 
-        if c_idx == 0:
+        if c_idx == 0 and round == 0:
             for name, param in self.client_model[c_idx].named_parameters():
                 print(f"{name}: requires_grad={param.requires_grad}")
 

@@ -6,7 +6,7 @@ def modelsel(args, device):
     if args.dataset in ['vlcs', 'pacs', 'off_home', 'off-cal', 'covid']:
         server_model = AlexNet(num_classes=args.num_classes).to(device)
     elif 'medmnist' in args.dataset:
-        server_model = lenet5v(args.alg.lower()).to(device)
+        server_model = lenet5v(args.alg.lower(), args.prompt_dim).to(device)
     elif 'pamap' in args.dataset:
         server_model = PamapModel().to(device)
 

@@ -12,8 +12,12 @@ class fedavg(torch.nn.Module):
         super(fedavg, self).__init__()
         self.server_model, self.client_model, self.client_weight = modelsel(
             args, args.device)
-        self.optimizers = [optim.SGD(filter(lambda p: p.requires_grad, self.client_model[idx].parameters(
-        )), lr=args.lr) for idx in range(args.n_clients)]
+        # print(f"111111{self.client_model[0]}")
+        # 都是True
+        # for name, param in self.client_model[0].named_parameters():
+        #     print(f"{name}: requires_grad={param.requires_grad}")
+        self.optimizers = [optim.SGD(filter(lambda p: p.requires_grad, self.client_model[idx].parameters()), lr=args.lr) 
+                           for idx in range(args.n_clients)]
         self.loss_fun = nn.CrossEntropyLoss()
         self.args = args
 

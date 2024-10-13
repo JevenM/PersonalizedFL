@@ -20,12 +20,30 @@ python main.py --alg fedavg --dataset medmnist --iters 100 --wk_iters 1 --non_ii
 # Personalized test acc for each client: 0.7048,0.7147,0.6133,0.7074,0.7261,0.6596,0.6613,0.7387,0.6453,0.7253,0.6133,0.7314,0.6133,0.7594,0.6907,0.6941,0.7394,0.6230,0.6524,0.7500,
 # Average accuracy: 0.6882
 
+
+3. fedprox
 python main.py --alg fedprox --dataset medmnist --iters 300 --wk_iters 1 --non_iid_alpha 0.1 --mu 0.1
 #Personalized test acc for each client: 0.7040,0.7936,0.8133,0.6987,0.7899,0.7158,0.8005,0.6756,0.7707,0.7120,0.6952,0.8133,0.8053,0.7139,0.8107,0.7373,0.7480,0.7807,0.8355,0.7131,
 #Average accuracy: 0.7564
+python main.py --alg fedprox --dataset medmnist --iters 300 --wk_iters 1 --non_iid_alpha 0.01 --mu 0.1
+# Personalized test acc for each client: 0.7420,0.7547,0.7200,0.7367,0.7447,0.7367,0.7333,0.7733,0.7253,0.7867,0.7120,0.7899,0.6933,0.8155,0.7760,0.7899,0.7979,0.6979,0.7487,0.8191,
+# Average accuracy: 0.7547
 
-3. fedlp (latent prompt)
+4. fedlp (latent prompt)
 python main.py --alg fedlp --dataset medmnist --iters 300 --wk_iters 1 --non_iid_alpha 0.01 --pretrained_iters 150
+
+# prompt_dim = 8:
+python main.py --alg fedlp --dataset medmnist --iters 300 --wk_iters 1 --non_iid_alpha 0.01 --lr 0.0001
+# Personalized test acc for each client: 0.6915,0.8213,0.7813,0.7234,0.7872,0.7314,0.8320,0.7200,0.6667,0.8000,0.7147,0.7207,0.7307,0.8048,0.7467,0.7287,0.7926,0.6791,0.6979,0.7367,
+# Average accuracy: 0.7454
+
+# prompt_dim = 16:
+python main.py --alg fedlp --dataset medmnist --iters 300 --wk_iters 1 --non_iid_alpha 0.01 --lr 0.0001
+# Personalized test acc for each client: 0.2234,0.6427,0.4240,0.4894,0.6649,0.3484,0.3947,0.4827,0.3520,0.5333,0.2907,0.6941,0.2960,0.5615,0.4267,0.4814,0.6702,0.3155,0.2433,0.7181,
+# Average accuracy: 0.4626
+
+# prompt_dim = 4:
+python main.py --alg fedlp --dataset medmnist --iters 300 --wk_iters 1 --non_iid_alpha 0.01 --lr 0.0001
 
 
 

@@ -175,7 +175,7 @@ class PamapModel(nn.Module):
 
 
 class lenet5v(nn.Module):
-    def __init__(self, algs_name):
+    def __init__(self, algs_name, prompt_dim):
         super(lenet5v, self).__init__()
         self.algs_name = algs_name
         self.conv1 = nn.Conv2d(1, 6, 5)
@@ -192,14 +192,15 @@ class lenet5v(nn.Module):
         self.relu4 = nn.ReLU()
         self.fc3 = nn.Linear(84, 11)
 
-        self.prompt = nn.Parameter(torch.randn(8, 256))
+        self.prompt = nn.Parameter(torch.randn(prompt_dim, 256))
         self.prompt_W_k = nn.Parameter(torch.randn(256, 256))
         self.prompt_W_v = nn.Parameter(torch.randn(256, 256))
         self.relu5 = nn.ReLU()
         self.scale = math.sqrt(256)  # 缩放因子
-        self.fc4 = nn.Linear(2304, 256)
+        self.fc4 = nn.Linear((prompt_dim+1)*256, 256)
 
     def forward(self, x, flag=0, server_prompt=None):
+        server_prompt.require_grad = False
         y = self.conv1(x)
         y = self.bn1(y)
         y = self.relu1(y)
@@ -215,7 +216,7 @@ class lenet5v(nn.Module):
         # y = self.relu4(y)
         # y = self.fc3(y)
 
-        if self.algs_name =='fedlp' and flag:
+        if self.algs_name =='fedlp' and flag != 0:
             W_K = torch.matmul(server_prompt, self.prompt_W_k)
             W_V = torch.matmul(server_prompt, self.prompt_W_v)
 
@@ -224,10 +225,10 @@ class lenet5v(nn.Module):
             attn = F.softmax(scores, dim=-1)
             output = torch.matmul(attn, W_V)
             output = output + self.prompt
-            output = output.reshape(-1)
+            output = output.reshape(-1) # [prompt_dim*256]
             
             # 增加一个批次维度，并复制 batch_size 份
-            output_repeated = output.unsqueeze(0).repeat(x.size(0), 1)  # 形状: [batch_size, 2048]  
+            output_repeated = output.unsqueeze(0).repeat(x.size(0), 1)  # 形状: [batch_size, prompt_dim*256]  
             y = torch.cat((y, output_repeated), dim=1)  # 在最后一个维度上拼接
             y = self.fc4(y)
             y = self.relu5(y)
