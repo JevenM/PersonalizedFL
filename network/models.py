@@ -197,10 +197,13 @@ class lenet5v(nn.Module):
         self.prompt_W_v = nn.Parameter(torch.randn(256, 256))
         self.relu5 = nn.ReLU()
         self.scale = math.sqrt(256)  # 缩放因子
-        self.fc4 = nn.Linear((prompt_dim+1)*256, 256)
+        # self.fc4 = nn.Linear((prompt_dim+1)*256, 256)
+        self.fc4 = nn.Linear(2*256, 256)
+        self.fc5 = nn.Linear((prompt_dim)*256, 256)
 
     def forward(self, x, flag=0, server_prompt=None):
-        server_prompt.require_grad = False
+        if server_prompt is not None:
+            server_prompt.require_grad = False
         y = self.conv1(x)
         y = self.bn1(y)
         y = self.relu1(y)
@@ -226,7 +229,7 @@ class lenet5v(nn.Module):
             output = torch.matmul(attn, W_V)
             output = output + self.prompt
             output = output.reshape(-1) # [prompt_dim*256]
-            
+            output = self.fc5(output) # [256]
             # 增加一个批次维度，并复制 batch_size 份
             output_repeated = output.unsqueeze(0).repeat(x.size(0), 1)  # 形状: [batch_size, prompt_dim*256]  
             y = torch.cat((y, output_repeated), dim=1)  # 在最后一个维度上拼接

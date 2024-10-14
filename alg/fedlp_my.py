@@ -19,7 +19,7 @@ class fedlp(fedavg):
     def set_client_weight(self, train_loaders):
         os.makedirs('./checkpoint/'+'pretrained/', exist_ok=True)
         preckpt = './checkpoint/'+'pretrained/' + \
-            self.args.dataset+'_'+str(self.args.batch)+'_'+str(self.args.pretrained_iters)+'_'+str(self.args.prom)
+            self.args.dataset+'_'+str(self.args.batch)+'_'+str(self.args.pretrained_iters)+'_'+str(self.args.prompt_dim)
         self.pretrain_model = copy.deepcopy(
             self.server_model).to(self.args.device)
         if not os.path.exists(preckpt):

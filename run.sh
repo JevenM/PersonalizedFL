@@ -42,8 +42,18 @@ python main.py --alg fedlp --dataset medmnist --iters 300 --wk_iters 1 --non_iid
 # Personalized test acc for each client: 0.2234,0.6427,0.4240,0.4894,0.6649,0.3484,0.3947,0.4827,0.3520,0.5333,0.2907,0.6941,0.2960,0.5615,0.4267,0.4814,0.6702,0.3155,0.2433,0.7181,
 # Average accuracy: 0.4626
 
-# prompt_dim = 4:
+# prompt_dim = 8: pretrained lr = fixed 0.01 修改计算流程
 python main.py --alg fedlp --dataset medmnist --iters 300 --wk_iters 1 --non_iid_alpha 0.01 --lr 0.0001
+# Personalized test acc for each client: 0.6676,0.8053,0.6773,0.8032,0.8059,0.7447,0.6773,0.7947,0.6453,0.8453,0.7520,0.7766,0.6827,0.8289,0.6987,0.7979,0.8351,0.6257,0.7059,0.8032,
+# Average accuracy: 0.7487
+
+# prompt_dim = 16:
+python main.py --alg fedlp --dataset medmnist --iters 300 --wk_iters 1 --non_iid_alpha 0.01 --lr 0.0001 --prompt_dim 16
+# Personalized test acc for each client: 0.7367,0.7947,0.7307,0.7899,0.8032,0.7739,0.7520,0.7307,0.6907,0.8160,0.7707,0.8059,0.7173,0.7781,0.7573,0.8085,0.8005,0.6952,0.7219,0.7926,
+# Average accuracy: 0.7633
+
+# prompt_dim = 32:
+python main.py --alg fedlp --dataset medmnist --iters 300 --wk_iters 1 --non_iid_alpha 0.01 --lr 0.0001 --prompt_dim 32
 
 
 

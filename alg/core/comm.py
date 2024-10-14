@@ -48,10 +48,13 @@ def communication_prompt(args, server_model, client_models, client_weights):
         for key in server_model.state_dict().keys():
             if 'prompt' == key:
                 print(f"keeeeeeeeeeeey: {key}")
+                print(f"before: {server_model.state_dict()[key]}")
                 temp = torch.zeros_like(server_model.state_dict()[key])
+                print(temp.shape)
                 for client_idx in range(len(client_weights)):
                     temp += client_weights[client_idx] * client_models[client_idx].state_dict()[key]
                 server_model.state_dict()[key].data.copy_(temp)
+                print(f"after: {server_model.state_dict()[key]}, {server_model.prompt}")
                 for client_idx in range(len(client_weights)):
                     client_models[client_idx].state_dict()[key].data.copy_(server_model.state_dict()[key])
             break
