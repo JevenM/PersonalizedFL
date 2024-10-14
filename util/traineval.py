@@ -29,7 +29,7 @@ def train(model, data_loader, optimizer, loss_fun, device):
     return loss_all / len(data_loader), correct/total
 
 
-def test(model, data_loader, loss_fun, device):
+def test(model, data_loader, loss_fun, device, flag=0, server_prompt=None):
     model.eval()
     loss_all = 0
     total = 0
@@ -38,7 +38,7 @@ def test(model, data_loader, loss_fun, device):
         for data, target in data_loader:
             data = data.to(device).float()
             target = target.to(device).long()
-            output = model(data)
+            output = model(data, flag, server_prompt)
             loss = loss_fun(output, target)
             loss_all += loss.item()
             total += target.size(0)
@@ -47,7 +47,7 @@ def test(model, data_loader, loss_fun, device):
 
         return loss_all / len(data_loader), correct/total
 
-def train_prompt(args, model, server_prompt, data_loader, optimizer, loss_fun, device, flag):
+def train_prompt(args, model, server_prompt, data_loader, optimizer, scheduler, loss_fun, device, flag):
     model.train()
     loss_all = 0
     total = 0
@@ -66,6 +66,7 @@ def train_prompt(args, model, server_prompt, data_loader, optimizer, loss_fun, d
         total += target.size(0)
         pred = output.data.max(1)[1]
         correct += pred.eq(target.view(-1)).sum().item()
+        scheduler.step()
 
     return loss_all / len(data_loader), correct/total
 

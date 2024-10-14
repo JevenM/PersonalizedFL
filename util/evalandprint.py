@@ -10,7 +10,7 @@ def evalandprint(args, algclass, train_loaders, val_loaders, test_loaders, SAVE_
             client_idx, train_loaders[client_idx])
         print(
             f' Site-{client_idx:02d} | Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.4f}')
-
+    best_epoch = -1
     # evaluation on valid data
     val_acc_list = [None] * args.n_clients
     for client_idx in range(args.n_clients):
@@ -23,7 +23,7 @@ def evalandprint(args, algclass, train_loaders, val_loaders, test_loaders, SAVE_
     if np.mean(val_acc_list) > np.mean(best_vacc):
         for client_idx in range(args.n_clients):
             best_vacc[client_idx] = val_acc_list[client_idx]
-            best_epoch = a_iter
+        best_epoch = a_iter
         best_changed = True
 
     if best_changed:
@@ -43,4 +43,4 @@ def evalandprint(args, algclass, train_loaders, val_loaders, test_loaders, SAVE_
         tosave['server_model']=algclass.server_model.state_dict()
         torch.save(tosave, SAVE_PATH)
 
-    return best_vacc, best_tacc, best_changed
+    return best_vacc, best_tacc, best_changed, best_epoch

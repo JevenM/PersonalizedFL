@@ -89,10 +89,10 @@ if __name__ == '__main__':
 
     best_changed = False
 
-    best_acc = [0] * args.n_clients
+    best_vacc = [0] * args.n_clients
     best_tacc = [0] * args.n_clients
     start_iter = 0
-
+    best_epoch = -1
     for a_iter in range(start_iter, args.iters):
         print(f"============ Train round {a_iter} ============")
 
@@ -111,20 +111,23 @@ if __name__ == '__main__':
             # server aggregation
             algclass.server_aggre()
 
-        best_acc, best_tacc, best_changed = evalandprint(
-            args, algclass, train_loaders, val_loaders, test_loaders, SAVE_PATH, best_acc, best_tacc, a_iter, best_changed)
-
+        best_vacc, best_tacc, best_changed, best_epoch_ = evalandprint(
+            args, algclass, train_loaders, val_loaders, test_loaders, SAVE_PATH, best_vacc, best_tacc, a_iter, best_changed)
+        if best_epoch_ > best_epoch:
+            best_epoch = best_epoch_
     if args.alg == 'metafed':
         print('Personalization stage')
         for c_idx in range(args.n_clients):
             algclass.personalization(
                 c_idx, train_loaders[algclass.csort[c_idx]], val_loaders[algclass.csort[c_idx]])
-        best_acc, best_tacc, best_changed = evalandprint(
-            args, algclass, train_loaders, val_loaders, test_loaders, SAVE_PATH, best_acc, best_tacc, a_iter, best_changed)
-
+        best_vacc, best_tacc, best_changed, best_epoch = evalandprint(
+            args, algclass, train_loaders, val_loaders, test_loaders, SAVE_PATH, best_vacc, best_tacc, a_iter, best_changed)
+        if best_epoch_ > best_epoch:
+            best_epoch = best_epoch_
+            
     s = 'Personalized test acc for each client: '
     for item in best_tacc:
         s += f'{item:.4f},'
     mean_acc_test = np.mean(np.array(best_tacc))
-    s += f'\nAverage accuracy: {mean_acc_test:.4f}'
+    s += f'\nAverage accuracy: {mean_acc_test:.4f}, best_epoch: {best_epoch}'
     print(s)

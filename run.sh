@@ -52,8 +52,29 @@ python main.py --alg fedlp --dataset medmnist --iters 300 --wk_iters 1 --non_iid
 # Personalized test acc for each client: 0.7367,0.7947,0.7307,0.7899,0.8032,0.7739,0.7520,0.7307,0.6907,0.8160,0.7707,0.8059,0.7173,0.7781,0.7573,0.8085,0.8005,0.6952,0.7219,0.7926,
 # Average accuracy: 0.7633
 
-# prompt_dim = 32:
+# prompt_dim = 8: 学习率增大 0.001
+python main.py --alg fedlp --dataset medmnist --iters 300 --wk_iters 1 --non_iid_alpha 0.01 --lr 0.001 --prompt_dim 8
+# Personalized test acc for each client: 0.8112,0.9360,0.7947,0.8165,0.8750,0.7819,0.8213,0.8373,0.7893,0.8880,0.7547,0.9016,0.8080,0.8984,0.7653,0.7979,0.8484,0.7567,0.7353,0.9016,
+# Average accuracy: 0.8260
+
+# prompt_dim = 32: (adam 150预训练 之后交替训练 schedule)
 python main.py --alg fedlp --dataset medmnist --iters 300 --wk_iters 1 --non_iid_alpha 0.01 --lr 0.0001 --prompt_dim 32
+# Personalized test acc for each client: 0.8324,0.9573,0.8587,0.8777,0.8670,0.8351,0.8667,0.8827,0.7920,0.8880,0.8160,0.9255,0.8587,0.8930,0.7573,0.8644,0.8644,0.7995,0.8048,0.9069,
+# Average accuracy: 0.8574, best_epoch: 85
+
+
+# 32 取消预训练 adam 发现很早就达到最好，训练loss为0，acc为100，所以减小round为100，交替训练
+python main.py --alg fedlp --dataset medmnist --iters 100 --wk_iters 1 --non_iid_alpha 0.01 --lr 0.0001 --prompt_dim 32
+# Personalized test acc for each client: 0.7048,0.8747,0.7840,0.8245,0.8005,0.6915,0.7120,0.7813,0.7093,0.7653,0.7280,0.8032,0.6720,0.8155,0.6720,0.7048,0.8138,0.6979,0.7086,0.8245,
+# Average accuracy: 0.7544
+
+
+# 预训练，交替，没有进行schedule (模型评估加上prompt)
+python main.py --alg fedlp --dataset medmnist --iters 100 --wk_iters 1 --non_iid_alpha 0.01 --lr 0.001 --prompt_dim 8
+# Personalized test acc for each client: 0.0851,0.8693,0.7440,0.7660,0.7926,0.7394,0.8213,0.7867,0.0907,0.0773,0.7387,0.9043,0.6853,0.8396,0.7120,0.7287,0.8112,0.7005,0.7219,0.8750,
+# Average accuracy: 0.6745, best_epoch: 86
+
+---------------------------以上先训练prompt再训练其他，交替训练----------------------------------
 
 
 
