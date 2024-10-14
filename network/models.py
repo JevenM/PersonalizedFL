@@ -200,6 +200,8 @@ class lenet5v(nn.Module):
         # self.fc4 = nn.Linear((prompt_dim+1)*256, 256)
         self.fc4 = nn.Linear(2*256, 256)
         self.fc5 = nn.Linear((prompt_dim)*256, 256)
+        # 定义一个可学习的缩放因子
+        # self.hyp = nn.Parameter(torch.randn(1))
 
     def forward(self, x, flag=0, server_prompt=None):
         if server_prompt is not None:
@@ -227,6 +229,7 @@ class lenet5v(nn.Module):
 
             attn = F.softmax(scores, dim=-1)
             output = attn @ W_V
+            # output = output + self.prompt * self.hyp 
             output = output + self.prompt
             output = output.reshape(-1) # [prompt_dim*256]
             output = self.fc5(output) # [256]
