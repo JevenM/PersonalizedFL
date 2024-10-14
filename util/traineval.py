@@ -47,7 +47,7 @@ def test(model, data_loader, loss_fun, device):
 
         return loss_all / len(data_loader), correct/total
 
-def train_prompt(args, model, server_prompt, data_loader, optimizer, loss_fun, device):
+def train_prompt(args, model, server_prompt, data_loader, optimizer, loss_fun, device, flag):
     model.train()
     loss_all = 0
     total = 0
@@ -56,7 +56,7 @@ def train_prompt(args, model, server_prompt, data_loader, optimizer, loss_fun, d
         data = data.to(device).float()
         target = target.to(device).long()
         
-        output = model(data, 1, server_prompt)
+        output = model(data, flag, server_prompt)
         loss = loss_fun(output, target)
         optimizer.zero_grad()
         loss.backward()

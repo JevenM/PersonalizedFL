@@ -22,6 +22,7 @@ class fedlp(fedavg):
             self.args.dataset+'_'+str(self.args.batch)+'_'+str(self.args.pretrained_iters)+'_'+str(self.args.prompt_dim)
         self.pretrain_model = copy.deepcopy(
             self.server_model).to(self.args.device)
+        self.server_model.prompt.requires_grad = False
         if not os.path.exists(preckpt):
             pretrain_model(self.args, self.pretrain_model, preckpt, self.args.device)
         else:
@@ -29,20 +30,36 @@ class fedlp(fedavg):
             print(f"pretrained model acc: {torch.load(preckpt)['acc']}")
         for client_idx in range(self.args.n_clients):
             self.client_model[client_idx].load_state_dict(self.pretrain_model.state_dict())
+            for name, param in self.client_model[client_idx].named_parameters():
+                if "conv1" in name or "bn1" in name or "conv2" in name or "bn2" in name or 'fc1' in name or "fc2" in name or "fc3" in name:
+                    param.requires_grad = False
+        self.optimizers = [optim.Adam(filter(lambda p: p.requires_grad, self.client_model[idx].parameters()), lr=self.args.lr) 
+                           for idx in range(self.args.n_clients)]
 
     def client_train(self, c_idx, dataloader, round):
-        for name, param in self.client_model[c_idx].named_parameters():
-            if "conv1" in name or "bn1" in name or "conv2" in name or "bn2" in name:
-                param.requires_grad = False
-
         if c_idx == 0 and round == 0:
             for name, param in self.client_model[c_idx].named_parameters():
                 print(f"{name}: requires_grad={param.requires_grad}")
 
             print(self.client_model[c_idx])
 
+        for name, param in self.client_model[c_idx].named_parameters():
+            if "conv1" in name or "bn1" in name or "conv2" in name or "bn2" in name or 'fc1' in name or "fc2" in name or "fc3" in name:
+                param.requires_grad = False
+            if "prompt" in name or 'fc4' in name or "fc4" in name:
+                param.requires_grad = True
+        self.optimizers[c_idx] = optim.Adam(filter(lambda p: p.requires_grad, self.client_model[c_idx].parameters()), lr=self.args.lr) 
         train_loss, train_acc = train_prompt(
-            self.args, self.client_model[c_idx], copy.deepcopy(self.server_model.prompt).detach(), dataloader, self.optimizers[c_idx], self.loss_fun, self.args.device)
+            self.args, self.client_model[c_idx], self.server_model.prompt, dataloader, self.optimizers[c_idx], self.loss_fun, self.args.device, 1)
+        
+        for name, param in self.client_model[c_idx].named_parameters():
+            if "prompt" in name or 'fc4' in name or "fc4" in name:
+                param.requires_grad = False
+            if "conv1" in name or "bn1" in name or "conv2" in name or "bn2" in name or 'fc1' in name or "fc2" in name or "fc3" in name:
+                param.requires_grad = True
+        self.optimizers[c_idx] = optim.Adam(self.client_model[c_idx].parameters(), lr=self.args.lr) 
+        train_loss, train_acc = train_prompt(
+            self.args, self.client_model[c_idx], None, dataloader, self.optimizers[c_idx], self.loss_fun, self.args.device, 0)
         return train_loss, train_acc
 
     def server_aggre(self):

@@ -220,13 +220,13 @@ class lenet5v(nn.Module):
         # y = self.fc3(y)
 
         if self.algs_name =='fedlp' and flag != 0:
-            W_K = torch.matmul(server_prompt, self.prompt_W_k)
-            W_V = torch.matmul(server_prompt, self.prompt_W_v)
+            W_K = server_prompt @ self.prompt_W_k
+            W_V = server_prompt @ self.prompt_W_v
 
-            scores = torch.matmul(self.prompt, W_K.t()) / self.scale
+            scores = (self.prompt @ W_K.t()) / self.scale
 
             attn = F.softmax(scores, dim=-1)
-            output = torch.matmul(attn, W_V)
+            output = attn @ W_V
             output = output + self.prompt
             output = output.reshape(-1) # [prompt_dim*256]
             output = self.fc5(output) # [256]
