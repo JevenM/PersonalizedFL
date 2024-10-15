@@ -55,21 +55,19 @@ class fedlp(fedavg):
             self.args, self.client_model[c_idx], self.server_model.prompt, dataloader, self.optimizers[c_idx], self.loss_fun, self.args.device, 1)
         
         for name, param in self.client_model[c_idx].named_parameters():
-            # 固定classifier，交替prompt和backbone
-            if "prompt" in name or 'fc4' in name or "fc5" in name or 'fc1' in name or "fc2" in name or "fc3" in name:
-                param.requires_grad = False
-            
-            if "conv1" in name or "bn1" in name or "conv2" in name or "bn2" in name:
-                param.requires_grad = True
-
-            # 第1好
-            # if "prompt" in name or 'fc4' in name or "fc5" in name or "conv1" in name or "bn1" in name or "conv2" in name or "bn2" in name:
+            # 第3好，固定classifier，交替prompt和backbone
+            # if "prompt" in name or 'fc4' in name or "fc5" in name or 'fc1' in name or "fc2" in name or "fc3" in name:
             #     param.requires_grad = False
-            
-            # if 'fc1' in name or "fc2" in name or "fc3" in name:
+            # if "conv1" in name or "bn1" in name or "conv2" in name or "bn2" in name:
             #     param.requires_grad = True
+
+            # 第1好，固定backbone
+            if "prompt" in name or 'fc4' in name or "fc5" in name or "conv1" in name or "bn1" in name or "conv2" in name or "bn2" in name:
+                param.requires_grad = False
+            if 'fc1' in name or "fc2" in name or "fc3" in name:
+                param.requires_grad = True
             
-            # 下面这个第2最好
+            # 第2好，交替训练prompt和classifier+backbone
             # if "prompt" in name or 'fc4' in name or "fc5" in name:
             #     param.requires_grad = False
             # if "conv1" in name or "bn1" in name or "conv2" in name or "bn2" in name or 'fc1' in name or "fc2" in name or "fc3" in name:
