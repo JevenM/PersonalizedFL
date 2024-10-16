@@ -12,7 +12,7 @@ def get_similarity(image_features, text_features):
     return similarity
 
 
-def get_image_features(image, model, cpreprocess, device='cuda', need_preprocess=False):
+def get_image_features(image, model, cpreprocess, device='cuda:1', need_preprocess=False):
     if need_preprocess:
         image = cpreprocess(image).unsqueeze(0).to(device)
     with torch.no_grad():
@@ -25,7 +25,7 @@ def freeze_param(model):
         param.requires_grad = False
 
 
-def get_text_features_list(texts, model, device='cuda', train=False):
+def get_text_features_list(texts, model, device='cuda:1', train=False):
     if train:
         text_inputs = torch.cat([clip.tokenize(c)
                                 for c in texts]).to(device)

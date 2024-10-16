@@ -201,7 +201,7 @@ class lenet5v(nn.Module):
         self.fc4 = nn.Linear(2*256, 256)
         self.fc5 = nn.Linear((prompt_dim)*256, 256)
         # 定义一个可学习的缩放因子
-        # self.hyp = nn.Parameter(torch.randn(1))
+        self.hyp = nn.Parameter(torch.randn(1))
 
     def forward(self, x, flag=0, server_prompt=None):
         if server_prompt is not None:
@@ -215,11 +215,6 @@ class lenet5v(nn.Module):
         y = self.relu2(y)
         y = self.pool2(y)
         y = y.view(y.shape[0], -1)
-        # y = self.fc1(y)
-        # y = self.relu3(y)
-        # y = self.fc2(y)
-        # y = self.relu4(y)
-        # y = self.fc3(y)
 
         if self.algs_name =='fedlp' and flag != 0:
             W_K = server_prompt @ self.prompt_W_k
@@ -229,13 +224,13 @@ class lenet5v(nn.Module):
 
             attn = F.softmax(scores, dim=-1)
             output = attn @ W_V
-            # output = output + self.prompt * self.hyp 
+            output = output + self.prompt * self.hyp 
             output = output + self.prompt
             output = output.reshape(-1) # [prompt_dim*256]
             output = self.fc5(output) # [256]
             # 增加一个批次维度，并复制 batch_size 份
-            output_repeated = output.unsqueeze(0).repeat(x.size(0), 1)  # 形状: [batch_size, prompt_dim*256]  
-            y = torch.cat((y, output_repeated), dim=1)  # 在最后一个维度上拼接
+            output_repeated = output.unsqueeze(0).repeat(x.size(0), 1)  # 形状: [batch_size, 256]  
+            y = torch.cat((y, output_repeated), dim=1)  # 在最后一个维度上拼接 [batch_size, 2*256]
             y = self.fc4(y)
             y = self.relu5(y)
         y = self.fc1(y)

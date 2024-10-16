@@ -117,7 +117,7 @@ def communication(args, server_model, models, client_weights):
 
 
 if __name__ == '__main__':
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='pacs')
     parser.add_argument('--lr', type=float, default=5e-5, help='learning rate')

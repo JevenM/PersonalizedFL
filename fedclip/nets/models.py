@@ -20,7 +20,7 @@ class ClipModelat(object):
         'ViT-L/14@336px'
     ]
 
-    def __init__(self, model_name='Vit-B/32', device='cuda', logger=None, imgadpy=True, freezepy=True):
+    def __init__(self, model_name='Vit-B/32', device='cuda:1', logger=None, imgadpy=True, freezepy=True):
         self.logger = logger
         if type(model_name) is int:
             model_name = self.index_to_model(model_name)

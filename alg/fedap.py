@@ -15,15 +15,14 @@ class fedap(fedavg):
     def set_client_weight(self, train_loaders):
         os.makedirs('./checkpoint/'+'pretrained/', exist_ok=True)
         preckpt = './checkpoint/'+'pretrained/' + \
-            self.args.dataset+'_'+str(self.args.batch)
+            self.args.dataset+'_'+str(self.args.batch)+'_'+str(self.args.pretrained_iters)+'_' +str(self.args.lr)
         self.pretrain_model = copy.deepcopy(
             self.server_model).to(self.args.device)
         if not os.path.exists(preckpt):
-            pretrain_model(self.args, self.pretrain_model,
-                           preckpt, self.args.device)
+            pretrain_model(self.args, self.pretrain_model, preckpt, self.args.device)
         self.preckpt = preckpt
         self.client_weight = get_weight_preckpt(
-            self.args, self.pretrain_model, self.preckpt, train_loaders, self.client_weight)
+            self.args, self.pretrain_model, self.preckpt, train_loaders, self.client_weight, self.args.device)
 
 
 def get_form(model):

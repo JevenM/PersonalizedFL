@@ -138,7 +138,7 @@ def trainwithteacher(model, data_loader, optimizer, loss_fun, device, tmodel, la
     return loss_all / len(data_loader), correct/total
 
 
-def pretrain_model(args, model, filename, device='cuda'):
+def pretrain_model(args, model, filename, device='cuda:1'):
     print('===training pretrained model===')
     data = get_whole_dataset(args.dataset)(args)
     predata = define_pretrain_dataset(args, data)

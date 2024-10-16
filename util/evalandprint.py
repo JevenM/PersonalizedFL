@@ -43,4 +43,4 @@ def evalandprint(args, algclass, train_loaders, val_loaders, test_loaders, SAVE_
         tosave['server_model']=algclass.server_model.state_dict()
         torch.save(tosave, SAVE_PATH)
 
-    return best_vacc, best_tacc, best_changed, best_epoch
+    return best_vacc, best_tacc, best_changed, best_epoch, val_acc_list

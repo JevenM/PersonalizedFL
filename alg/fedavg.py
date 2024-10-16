@@ -19,7 +19,7 @@ class fedavg(torch.nn.Module):
         #     print(f"{name}: requires_grad={param.requires_grad}")
         # self.optimizers = [optim.SGD(self.client_model[idx].parameters(), lr=args.lr) 
         #                    for idx in range(args.n_clients)]
-        self.optimizers = [optim.Adam(filter(lambda p: p.requires_grad, self.client_model[idx].parameters()), lr=args.lr) 
+        self.optimizers = [optim.SGD(filter(lambda p: p.requires_grad, self.client_model[idx].parameters()), lr=args.lr, weight_decay=args.wd) 
                            for idx in range(args.n_clients)]
         self.loss_fun = nn.CrossEntropyLoss()
         
@@ -30,12 +30,11 @@ class fedavg(torch.nn.Module):
         return train_loss, train_acc
 
     def server_aggre(self):
-        self.server_model, self.client_model = communication(
-            self.args, self.server_model, self.client_model, self.client_weight)
+        self.server_model, self.client_model = communication(self.args, self.server_model, self.client_model, self.client_weight)
 
     def client_eval(self, c_idx, dataloader):
         train_loss, train_acc = test(
-            self.client_model[c_idx], dataloader, self.loss_fun, self.args.device, 1, self.server_model.prompt)
+            self.client_model[c_idx], dataloader, self.loss_fun, self.args.device)
         return train_loss, train_acc
 
     def server_eval(self, dataloader):

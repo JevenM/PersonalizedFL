@@ -3,7 +3,7 @@ import os
 import copy
 import torch.nn as nn
 import torch.optim as optim
-from util.traineval import pretrain_model
+from util.traineval import pretrain_model, test
 from util.modelsel import modelsel
 from util.traineval import train, train_prompt
 from alg.core.comm import communication, communication_prompt
@@ -19,7 +19,7 @@ class fedlp(fedavg):
     def set_client_weight(self, train_loaders):
         os.makedirs('./checkpoint/'+'pretrained/', exist_ok=True)
         preckpt = './checkpoint/'+'pretrained/' + \
-            self.args.dataset+'_'+str(self.args.batch)+'_'+str(self.args.pretrained_iters)+'_'+str(self.args.prompt_dim)
+            self.args.dataset+'_'+str(self.args.batch)+'_'+str(self.args.pretrained_iters)+'_'+str(self.args.prompt_dim) + '_' +str(self.args.lr)
         self.pretrain_model = copy.deepcopy(
             self.server_model).to(self.args.device)
         self.server_model.prompt.requires_grad = False
@@ -34,16 +34,16 @@ class fedlp(fedavg):
             for name, param in self.client_model[client_idx].named_parameters():
                 if "conv1" in name or "bn1" in name or "conv2" in name or "bn2" in name or 'fc1' in name or "fc2" in name or "fc3" in name:
                     param.requires_grad = False
-        self.optimizers = [optim.Adam(filter(lambda p: p.requires_grad, self.client_model[idx].parameters()), lr=self.args.lr) 
+        self.optimizers = [optim.Adam(filter(lambda p: p.requires_grad, self.client_model[idx].parameters()), lr=self.args.lr, weight_decay=self.args.wd) 
                            for idx in range(self.args.n_clients)]
 
     def client_train(self, c_idx, dataloader, round):
         for name, param in self.client_model[c_idx].named_parameters():
             if "conv1" in name or "bn1" in name or "conv2" in name or "bn2" in name or 'fc1' in name or "fc2" in name or "fc3" in name:
                 param.requires_grad = False
-            if "prompt" in name or 'fc4' in name or "fc5" in name:
+            if "prompt" in name or 'fc4' in name or "fc5" in name or "hyp" in name:
                 param.requires_grad = True
-        self.optimizers[c_idx] = optim.Adam(filter(lambda p: p.requires_grad, self.client_model[c_idx].parameters()), lr=self.args.lr) 
+        self.optimizers[c_idx] = optim.Adam(filter(lambda p: p.requires_grad, self.client_model[c_idx].parameters()), lr=self.args.lr, weight_decay=self.args.wd) 
 
         if c_idx == 0 and round == 0:
             for name, param in self.client_model[c_idx].named_parameters():
@@ -62,7 +62,7 @@ class fedlp(fedavg):
             #     param.requires_grad = True
 
             # 第1好，固定backbone
-            if "prompt" in name or 'fc4' in name or "fc5" in name or "conv1" in name or "bn1" in name or "conv2" in name or "bn2" in name:
+            if "prompt" in name or 'fc4' in name or "fc5" in name or "hyp" in name or "conv1" in name or "bn1" in name or "conv2" in name or "bn2" in name:
                 param.requires_grad = False
             if 'fc1' in name or "fc2" in name or "fc3" in name:
                 param.requires_grad = True
@@ -73,7 +73,7 @@ class fedlp(fedavg):
             # if "conv1" in name or "bn1" in name or "conv2" in name or "bn2" in name or 'fc1' in name or "fc2" in name or "fc3" in name:
             #     param.requires_grad = True
 
-        self.optimizers[c_idx] = optim.Adam(filter(lambda p: p.requires_grad, self.client_model[c_idx].parameters()), lr=self.args.lr)
+        self.optimizers[c_idx] = optim.Adam(filter(lambda p: p.requires_grad, self.client_model[c_idx].parameters()), lr=self.args.lr, weight_decay=self.args.wd)
 
         if c_idx == 0 and round == 0:
             for name, param in self.client_model[c_idx].named_parameters():
@@ -86,7 +86,14 @@ class fedlp(fedavg):
 
         return train_loss, train_acc
 
-    def server_aggre(self):
+    def server_aggre(self, client_weight=None):
+        if client_weight is not None:
+            self.client_weight = client_weight
         self.server_model, self.client_model = communication_prompt(
             self.args, self.server_model, self.client_model, self.client_weight)
+    
+    def client_eval(self, c_idx, dataloader):
+        train_loss, train_acc = test(
+            self.client_model[c_idx], dataloader, self.loss_fun, self.args.device, 1, self.server_model.prompt)
+        return train_loss, train_acc
 
