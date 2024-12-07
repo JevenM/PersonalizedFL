@@ -5,6 +5,7 @@ from alg.base import base
 from alg.fedap import fedap
 from alg.metafed import metafed
 from alg.fedlp_my import fedlp
+from alg.fedlp_my_clip import fedlp_clip
 
 ALGORITHMS = [
     'fedavg',
@@ -14,6 +15,7 @@ ALGORITHMS = [
     'fedap',
     'metafed',
     'fedlp'
+    'fedlp_clip'
 ]
 
 

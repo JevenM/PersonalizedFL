@@ -8,13 +8,14 @@ from util.modelsel import modelsel
 from util.traineval import train, train_prompt
 from alg.core.comm import communication, communication_prompt
 
+# import clip
 import copy
 from alg.fedavg import fedavg
 
 
-class fedlp(fedavg):
+class fedlp_clip(fedavg):
     def __init__(self, args):
-        super(fedlp, self).__init__(args)
+        super(fedlp_clip, self).__init__(args)
 
     def set_client_weight(self, train_loaders):
         os.makedirs("./checkpoint/" + "pretrained/", exist_ok=True)
@@ -163,7 +164,6 @@ class fedlp(fedavg):
         return train_loss, train_acc
 
     def server_aggre(self, client_weight=None):
-        # print(client_weight, self.client_weight)
         if client_weight is not None:
             self.client_weight = client_weight
         self.server_model, self.client_model = communication_prompt(
