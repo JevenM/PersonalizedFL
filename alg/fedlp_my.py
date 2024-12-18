@@ -36,6 +36,7 @@ class fedlp(fedavg):
         if not os.path.exists(preckpt):
             pretrain_model(self.args, self.pretrain_model, preckpt, self.args.device)
         else:
+            print(f"exist: {preckpt}")
             self.pretrain_model.load_state_dict(torch.load(preckpt)["state"])
             print(f"pretrained model train acc: {torch.load(preckpt)['acc']}")
 

@@ -123,9 +123,9 @@ if __name__ == "__main__":
     best_epoch = -1
     val_acc_list = [0 for i_ in range(args.n_clients)]
     lr_new = args.lr
-    tau = 0.01
+    tau = 10
     # False  # 0.3*args.iters # 总共300的时候选80，什么时候开始不按照平均聚合
-    start_agg_round = 80
+    start_agg_round = 90
 
     for a_iter in range(start_iter, args.iters):
         print(f"============ Train round {a_iter} ============")

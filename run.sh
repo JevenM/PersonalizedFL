@@ -244,8 +244,13 @@ pymao main.py --alg fedlp --dataset medmnist --iters 300 --wk_iters 1 --non_iid_
 
 # wd=0, 在聚合时候根据val_acc_list的值设置指数变换权重，80个round开始, 指数的tau=0.01
 pymao main.py --alg fedlp --dataset medmnist --iters 300 --wk_iters 1 --non_iid_alpha 0.01 --prompt_dim 32 --lr 0.001 (adam)
+# Personalized test acc for each client: 0.8191,0.9013,0.8133,0.8590,0.8590,0.8085,0.8560,0.8507,0.7680,0.8267,0.7733,0.8803,0.7680,0.8583,0.7653,0.7952,0.8590,0.7620,0.7513,0.9016,                                                                                                                                                             
+# Average accuracy: 0.8238, best_epoch: 80
 
-
+# wd=0, 在聚合时候根据val_acc_list的值设置指数变换权重，90个round开始, 指数的tau=1, 修改网络模型结构，减少最后的fc2和fc3层
+pymao main.py --alg fedlp --dataset medmnist --iters 300 --wk_iters 1 --non_iid_alpha 0.01 --prompt_dim 32 --lr 0.001 --batch 32 (adam)
+# Personalized test acc for each client: 0.8245,0.8960,0.8293,0.8750,0.8564,0.8085,0.8400,0.8773,0.8027,0.8640,0.8027,0.8936,0.7867,0.8904,0.7813,0.8032,0.8750,0.7914,0.7647,0.9149,                                                                                                                               8750,0.7914,0.7647,0.9149,
+# Average accuracy: 0.8389, best_epoch: 73
 
 5. fedbn
 # python main.py --alg fedbn --dataset medmnist --iters 300 --wk_iters 1 --non_iid_alpha 0.01 --lr 0.001 (adam)

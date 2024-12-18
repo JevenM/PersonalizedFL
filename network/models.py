@@ -188,26 +188,27 @@ class lenet5v(nn.Module):
         self.bn2 = nn.BatchNorm2d(16)
         self.relu2 = nn.ReLU()
         self.pool2 = nn.MaxPool2d(2)
-        # self.fc = nn.Linear(256, 1024)
-        self.fc1 = nn.Linear(256, 120)
-        self.relu3 = nn.ReLU()
-        self.fc2 = nn.Linear(120, 84)
-        self.relu4 = nn.ReLU()
-        self.fc3 = nn.Linear(84, 11)
+        self.embedd_dim = 256
+        self.fc1 = nn.Linear(self.embedd_dim, 11)
+        # self.fc1 = nn.Linear(self.embedd_dim, 120)
+        # self.relu3 = nn.ReLU()
+        # self.fc2 = nn.Linear(120, 84)
+        # self.relu4 = nn.ReLU()
+        # self.fc3 = nn.Linear(84, 11)
 
-        self.prompt = nn.Parameter(torch.randn(prompt_dim, 256))
-        self.prompt_W_k = nn.Parameter(torch.randn(256, 256))
-        self.prompt_W_v = nn.Parameter(torch.randn(256, 256))
+        self.prompt = nn.Parameter(torch.randn(prompt_dim, self.embedd_dim))
+        self.prompt_W_k = nn.Parameter(torch.randn(self.embedd_dim, self.embedd_dim))
+        self.prompt_W_v = nn.Parameter(torch.randn(self.embedd_dim, self.embedd_dim))
 
         # self.Wei_z = nn.Parameter(torch.randn(512, prompt_dim))
         # self.Wei_r = nn.Parameter(torch.randn(512, prompt_dim))
         # self.Wei = nn.Parameter(torch.randn(512, 256))
 
         self.relu5 = nn.ReLU()
-        self.scale = math.sqrt(256)  # 缩放因子
+        self.scale = math.sqrt(self.embedd_dim)  # 缩放因子
         # self.fc4 = nn.Linear((prompt_dim+1)*256, 256)
-        self.fc4 = nn.Linear(2 * 256, 256)
-        self.fc5 = nn.Linear((prompt_dim) * 256, 256)
+        self.fc4 = nn.Linear(2 * self.embedd_dim, self.embedd_dim)
+        self.fc5 = nn.Linear((prompt_dim) * self.embedd_dim, self.embedd_dim)
         # 定义一个可学习的缩放因子
         self.hyp = nn.Parameter(torch.randn(1))
 
@@ -223,7 +224,6 @@ class lenet5v(nn.Module):
         y = self.relu2(y)
         y = self.pool2(y)
         y = y.view(y.shape[0], -1)
-        # y = self.fc(y)
 
         if self.algs_name == "fedlp" and flag != 0:
             # z_t = torch.sigmoid(torch.cat((server_prompt, self.prompt), dim=1) @ self.Wei_z) # mxm
@@ -246,17 +246,17 @@ class lenet5v(nn.Module):
             # 2. 拼接
             # output = torch.cat((output, self.prompt * h), dim=1)
             # output = torch.cat((output, prompt * h), dim=1)
-            output = output.reshape(-1)  # [prompt_dim*256]
-            output = self.fc5(output)  # [256]
+            output = output.reshape(-1)  # [prompt_dim*self.embedd_dim]
+            output = self.fc5(output)  # [self.embedd_dim]
             # 下面这行打开注释会导致收敛加快，但是性能降低
             # output = self.relu5(output)
             # 增加一个批次维度，并复制 batch_size 份
             output_repeated = output.unsqueeze(0).repeat(
                 x.size(0), 1
-            )  # 形状: [batch_size, 256]
+            )  # 形状: [batch_size, self.embedd_dim]
             y = torch.cat(
                 (y, output_repeated), dim=1
-            )  # 在最后一个维度上拼接 [batch_size, 2*256]
+            )  # 在最后一个维度上拼接 [batch_size, 2*self.embedd_dim]
             y = self.fc4(y)
             # 不能注释下面这行
             y = self.relu5(y)
@@ -265,10 +265,10 @@ class lenet5v(nn.Module):
             # y = self.relu5(y)
 
         y = self.fc1(y)
-        y = self.relu3(y)
-        y = self.fc2(y)
-        y = self.relu4(y)
-        y = self.fc3(y)
+        # y = self.relu3(y)
+        # y = self.fc2(y)
+        # y = self.relu4(y)
+        # y = self.fc3(y)
         return y
 
     def getallfea(self, x):
